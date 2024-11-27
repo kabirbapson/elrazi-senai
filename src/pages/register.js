@@ -21,24 +21,26 @@ const RegisterPage = () => {
 
   const formik = useFormik({
     initialValues: {
-      fullName: "",
+      full_name: "",
       email: "",
-      phone: "",
+      phone_number: "",
       address: "",
-      country: "",
+      country_of_residence: "",
       passportOrNIN: null,
-      degreeName: "",
+      qualifications: "",
+      input_name_of_degree: "",
       undergraduateDocs: null, // Optional file field
       postgraduateDocs: null, // Optional file field
     },
     validationSchema: Yup.object({
-      fullName: Yup.string().required("Full name is required"),
+      full_name: Yup.string().required("Full name is required"),
       email: Yup.string().email("Invalid email").required("Email is required"),
-      phone: Yup.string().required("Phone number is required"),
+      phone_number: Yup.string().required("Phone number is required"),
       address: Yup.string().required("Address is required"),
-      country: Yup.string().required("Country is required"),
+      country_of_residence: Yup.string().required("Country is required"),
       passportOrNIN: Yup.mixed().required("International Passport or NIN is required"),
-      degreeName: Yup.string().required("Degree name is required"),
+      qualifications: Yup.string().required("Qualifications are required"),
+      input_name_of_degree: Yup.string().required("Degree name is required"),
       undergraduateDocs: Yup.mixed().nullable(),
       postgraduateDocs: Yup.mixed().nullable(),
     }),
@@ -46,19 +48,19 @@ const RegisterPage = () => {
       setLoading(true); // Show loading state
       try {
         const formData = new FormData();
-        formData.append("fullName", values.fullName);
+        formData.append("full_name", values.full_name);
         formData.append("email", values.email);
-        formData.append("phone", values.phone);
+        formData.append("phone_number", values.phone_number);
         formData.append("address", values.address);
-        formData.append("country", values.country);
+        formData.append("country_of_residence", values.country_of_residence);
         formData.append("passportOrNIN", values.passportOrNIN);
-        formData.append("degreeName", values.degreeName);
+        formData.append("qualifications", values.qualifications);
+        formData.append("input_name_of_degree", values.input_name_of_degree);
 
         // Conditionally append files if present
         if (values.undergraduateDocs) {
           formData.append("undergraduateDocs", values.undergraduateDocs);
         }
-
         if (values.postgraduateDocs) {
           formData.append("postgraduateDocs", values.postgraduateDocs);
         }
@@ -68,16 +70,20 @@ const RegisterPage = () => {
             "Content-Type": "multipart/form-data",
           },
         });
-        console.log({ response });
+
         if (response.status === 201) {
-          // Display success message
+          setSuccessMessage(true); // Show success message
         } else {
-          alert("Registration failed. Please try again.");
+            alert("Registration failed. Please try again.");
         }
+        console.log({ response });
       } catch (error) {
-        setSuccessMessage(true);
-        console.error("Error during registration:", error);
-        alert("An error occurred during registration. Please try again later.");
+        if (error.response && error.response.status === 400) {
+          alert("An error occurred during registration. " + error.response.data.detail);
+        } else {
+          alert("An error occurred during registration. Please try again later.");
+        }
+        console.error("Error during registration:", error.response?.data || error.message);
       } finally {
         setLoading(false); // Hide loading state
       }
@@ -117,12 +123,12 @@ const RegisterPage = () => {
                     <TextField
                       fullWidth
                       label="Full Name"
-                      name="fullName"
-                      value={formik.values.fullName}
+                      name="full_name"
+                      value={formik.values.full_name}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      error={formik.touched.fullName && Boolean(formik.errors.fullName)}
-                      helperText={formik.touched.fullName && formik.errors.fullName}
+                      error={formik.touched.full_name && Boolean(formik.errors.full_name)}
+                      helperText={formik.touched.full_name && formik.errors.full_name}
                     />
                   </Grid>
 
@@ -145,12 +151,12 @@ const RegisterPage = () => {
                     <TextField
                       fullWidth
                       label="Phone Number"
-                      name="phone"
-                      value={formik.values.phone}
+                      name="phone_number"
+                      value={formik.values.phone_number}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      error={formik.touched.phone && Boolean(formik.errors.phone)}
-                      helperText={formik.touched.phone && formik.errors.phone}
+                      error={formik.touched.phone_number && Boolean(formik.errors.phone_number)}
+                      helperText={formik.touched.phone_number && formik.errors.phone_number}
                     />
                   </Grid>
 
@@ -173,12 +179,17 @@ const RegisterPage = () => {
                     <TextField
                       fullWidth
                       label="Country of Residence"
-                      name="country"
-                      value={formik.values.country}
+                      name="country_of_residence"
+                      value={formik.values.country_of_residence}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      error={formik.touched.country && Boolean(formik.errors.country)}
-                      helperText={formik.touched.country && formik.errors.country}
+                      error={
+                        formik.touched.country_of_residence &&
+                        Boolean(formik.errors.country_of_residence)
+                      }
+                      helperText={
+                        formik.touched.country_of_residence && formik.errors.country_of_residence
+                      }
                     />
                   </Grid>
 
@@ -204,17 +215,36 @@ const RegisterPage = () => {
                     </Stack>
                   </Grid>
 
+                  {/* Qualifications */}
+                  <Grid item xs={12}>
+                    <TextField
+                      fullWidth
+                      label="Qualifications"
+                      name="qualifications"
+                      value={formik.values.qualifications}
+                      onChange={formik.handleChange}
+                      onBlur={formik.handleBlur}
+                      error={formik.touched.qualifications && Boolean(formik.errors.qualifications)}
+                      helperText={formik.touched.qualifications && formik.errors.qualifications}
+                    />
+                  </Grid>
+
                   {/* Degree Name */}
                   <Grid item xs={12}>
                     <TextField
                       fullWidth
                       label="Degree Name"
-                      name="degreeName"
-                      value={formik.values.degreeName}
+                      name="input_name_of_degree"
+                      value={formik.values.input_name_of_degree}
                       onChange={formik.handleChange}
                       onBlur={formik.handleBlur}
-                      error={formik.touched.degreeName && Boolean(formik.errors.degreeName)}
-                      helperText={formik.touched.degreeName && formik.errors.degreeName}
+                      error={
+                        formik.touched.input_name_of_degree &&
+                        Boolean(formik.errors.input_name_of_degree)
+                      }
+                      helperText={
+                        formik.touched.input_name_of_degree && formik.errors.input_name_of_degree
+                      }
                     />
                   </Grid>
 
