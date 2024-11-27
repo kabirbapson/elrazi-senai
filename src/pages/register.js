@@ -38,13 +38,22 @@ const RegisterPage = () => {
       phone_number: Yup.string().required("Phone number is required"),
       address: Yup.string().required("Address is required"),
       country_of_residence: Yup.string().required("Country is required"),
-      passportOrNIN: Yup.mixed().required("International Passport or NIN is required"),
+      passportOrNIN: Yup.mixed()
+        .required("International Passport/NIN is required")
+        .test("fileSize", "File size is too large", (value) => {
+          return value && value.size <= 5 * 1024 * 1024; // 5MB max file size
+        })
+        .test("fileType", "Unsupported file format", (value) => {
+          return value && ["image/jpeg", "image/png", "application/pdf"].includes(value.type);
+        }),
       qualifications: Yup.string().required("Qualifications are required"),
       input_name_of_degree: Yup.string().required("Degree name is required"),
       undergraduateDocs: Yup.mixed().nullable(),
       postgraduateDocs: Yup.mixed().nullable(),
     }),
-    onSubmit: async (values) => {
+      onSubmit: async (values) => {
+        // console.log(values);  
+        //   return;
       setLoading(true); // Show loading state
       try {
         const formData = new FormData();
@@ -53,16 +62,17 @@ const RegisterPage = () => {
         formData.append("phone_number", values.phone_number);
         formData.append("address", values.address);
         formData.append("country_of_residence", values.country_of_residence);
-        formData.append("passportOrNIN", values.passportOrNIN);
+        formData.append("international_passport_nin", values.passportOrNIN);
         formData.append("qualifications", values.qualifications);
         formData.append("input_name_of_degree", values.input_name_of_degree);
 
+        
         // Conditionally append files if present
         if (values.undergraduateDocs) {
-          formData.append("undergraduateDocs", values.undergraduateDocs);
+          formData.append("undergraduate_documents", values.undergraduateDocs);
         }
         if (values.postgraduateDocs) {
-          formData.append("postgraduateDocs", values.postgraduateDocs);
+          formData.append("postgraduate_documents", values.postgraduateDocs);
         }
 
         const response = await axiosInstance.post("/senai-cimatec-forms/", formData, {
@@ -73,10 +83,10 @@ const RegisterPage = () => {
 
         if (response.status === 201) {
           setSuccessMessage(true); // Show success message
+          console.log({ response });
         } else {
-            alert("Registration failed. Please try again.");
+          alert("Registration failed. Please try again.");
         }
-        console.log({ response });
       } catch (error) {
         if (error.response && error.response.status === 400) {
           alert("An error occurred during registration. " + error.response.data.detail);
@@ -202,9 +212,12 @@ const RegisterPage = () => {
                         <input
                           type="file"
                           hidden
-                          onChange={(event) =>
-                            formik.setFieldValue("passportOrNIN", event.currentTarget.files[0])
-                          }
+                          accept="image/*,application/pdf"
+                          onChange={(event) => {
+                            const file = event.currentTarget.files[0];
+                            console.log("Selected file:", file); // Debug log
+                            formik.setFieldValue("passportOrNIN", file);
+                          }}
                         />
                       </Button>
                       {formik.errors.passportOrNIN && (
