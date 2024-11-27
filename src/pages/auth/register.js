@@ -60,7 +60,9 @@ const Page = () => {
     }),
     onSubmit: async (values) => {
       const { email, password, phone_number, first_name, last_name, source } = values;
-
+      // const formData = new FormData()
+      // formData.append('email', email)
+      // formData.append('')
       setLoading(true);
       try {
         axiosInstance

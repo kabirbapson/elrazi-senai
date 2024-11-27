@@ -1,216 +1,192 @@
-import * as React from "react";
-import { useState, useEffect, useContext } from "react";
 import Head from "next/head";
-import {
-  Box,
-  Button,
-  Card,
-  CircularProgress,
-  Container,
-  FormControl,
-  Unstable_Grid2 as Grid,
-  Input,
-  Stack,
-  Typography,
-  Modal,
-  TextField,
-} from "@mui/material";
-import { Layout as DashboardLayout } from "src/layouts/dashboard/layout";
-import { OverviewBudget } from "src/sections/overview/overview-budget";
-import { CalendarIcon } from "@mui/x-date-pickers";
-import axiosInstance from "src/api/config";
-import { toast } from "react-toastify";
-import { useRouter } from "next/navigation";
-import { AuthContext } from "src/context";
-import {
-  AdmissionApplication,
-  AdmissionApplicationProcess,
-  ApplicationFeeConfirmed,
-  ApplicationFeePaymentProcess,
-} from "src/components";
+import NextLink from "next/link";
+import { Box, Button, Card, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
 
-const modalStyle = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "background.paper",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-};
-
-const Page = () => {
-  const {
-    user,
-    token,
-    paymentUpload,
-    setPaymentUpload,
-    handleFetchUserDetails,
-    facultyCourses,
-    documentsCompleted,
-  } = useContext(AuthContext);
-  const [loading, setLoading] = useState(false);
-  const [openModal, setOpenModal] = useState(false);
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [userData, setUserData] = useState(user);
-
-  // lets write a modal pop up for the user to with an inout field to add phone number if not added
-  // if user.phone_number is null, show modal
-
-  useEffect(() => {
-    if (
-      user &&
-      (user.phone_number === null || user.phone_number === "" || user.phone_number.length < 6)
-    ) {
-      setOpenModal(true);
-    }
-  }, [user]);
-
-  // Modified to prevent closing the modal by clicking away
-  const handleModalClose = () => {
-    // Prevent closing if needed by not implementing body of this function
-    // setOpenModal(false); // Commented out to disable closing the modal by clicking away
-  };
-
-  const handlePhoneNumberChange = (event) => {
-    const value = event.target.value;
-    // Allow + as the first character, followed by digits only
-    const formattedValue =
-      value.charAt(0) === "+"
-        ? "+" + value.slice(1).replace(/[^0-9]/g, "")
-        : value.replace(/[^0-9]/g, "");
-
-    setPhoneNumber(formattedValue);
-
-    // Optionally, check for invalid characters and update helper text accordingly
-    // Check if the first character is + and the rest are digits, or all characters are digits
-    if (
-      (value.charAt(0) === "+" && !/^\+\d*$/.test(value)) ||
-      (value.charAt(0) !== "+" && !/^\d*$/.test(value))
-    ) {
-      setPhoneNumberError(`Only digits are allowed. '+' is allowed only as the first character.`);
-    } else if (phoneNumberError) {
-      setPhoneNumberError(""); // Clear the error if the input is now valid
-    }
-  };
-
-  const updateUserPhoneNumber = async () => {
-    // Validate the new phone number as needed
-    if (!phoneNumber.trim()) {
-      setPhoneNumberError("Phone number is required.");
-      return;
-    }
-    if (phoneNumber.length < 8) {
-      setPhoneNumberError("Phone number must be at least 8 characters.");
-      return;
-    }
-
-    setLoading(true); // Start loading
-
-    const updateData = {
-      phone_number: phoneNumber,
-    };
-
-    try {
-      await axiosInstance.put(
-        "/auth/user/",
-        { ...userData, ...updateData },
-        {
-          headers: {
-            Authorization: `Token ${token}`,
-          },
-        }
-      );
-      toast.success("Phone number updated successfully");
-      setOpenModal(false); // Close the modal on success
-    } catch (error) {
-      toast.error("Error updating phone number. Please try again.");
-      console.error("Error updating phone number:", error);
-    } finally {
-      setLoading(false); // End loading
-    }
-  };
-
+const LandingPage = () => {
   return (
     <>
       <Head>
-        <title>Dashboard | Elrazi Medical University, Kano</title>
+        <title>Executive MBA | Elrazi Medical University, Kano</title>
       </Head>
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          py: 8,
-        }}
-      >
-        <Container maxWidth="xl">
-          <Card sx={{ padding: { xs: "20px", sm: "40px" }, mb: "20px" }}>
-            {!documentsCompleted ? (
-              <>
-                {user?.has_paid ? (
-                  <ApplicationFeeConfirmed name={user?.first_name} />
-                ) : (
-                  <ApplicationFeePaymentProcess name={user?.first_name} />
-                )}
-              </>
-            ) : (
-              <AdmissionApplicationProcess user={user?.first_name} faculties={facultyCourses} />
-            )}
-          </Card>
-        </Container>
-      </Box>
-      <Modal
-        open={openModal}
-        onClose={(event, reason) => {
-          if (reason !== "backdropClick" && reason !== "escapeKeyDown") {
-            handleModalClose();
-          }
-          // This effectively prevents the modal from closing on clicking away or pressing escape.
-        }}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-        disablebackdropclick // This prop prevents the modal from closing when the backdrop is clicked
-        disableEscapeKeyDown // This prop prevents the modal from closing when the escape key is pressed
-      >
-        <Box sx={modalStyle}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Add Phone Number
-          </Typography>
-          <TextField
-            fullWidth
-            error={!!phoneNumberError}
-            helperText={phoneNumberError || "Enter your phone number (digits only)."}
-            label="Phone Number"
-            value={phoneNumber}
-            onChange={handlePhoneNumberChange}
-            margin="normal"
-            inputProps={{ inputMode: "numeric", pattern: "[0-9]*" }} // Encourages numeric keyboard on mobile devices
-          />
-          <Button
-            onClick={() => updateUserPhoneNumber(phoneNumber)}
-            variant="contained"
-            sx={{
-              my: 2,
-              width: "100%", // Makes the button full width of its parent container
-              display: "flex",
-              justifyContent: "center", // Ensures the content is centered
-              alignItems: "center", // Vertically centers the loading indicator and text
-            }}
-            disabled={
-              !phoneNumber.trim() || !!phoneNumberError || loading || phoneNumber.length < 8
-            }
-          >
-            {loading ? <CircularProgress size={20} /> : "Submit"}
-          </Button>
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
+        {/* Header Section */}
+        <Box
+          sx={{
+            backgroundImage: 'url("/assets/senai1.jpg")',
+            backgroundSize: "cover", // This will make the image fill the container
+            backgroundPosition: "center", // This centers the image
+            backgroundRepeat: "no-repeat", // This prevents the image from repeating
+            color: "#fff",
+            py: 10,
+            textAlign: "center",
+          }}
+        >
+          <Container maxWidth="lg">
+            <Typography variant="h3" fontWeight="bold">
+              A Global Partnership for Healthcare Leadership
+            </Typography>
+            <Typography variant="h5" sx={{ mt: 2 }}>
+              Transform your career with our Executive MBA in Health Management Technology
+            </Typography>
+            <Button
+              component={NextLink}
+              href="register"
+              size="large"
+              variant="contained"
+              sx={{
+                mt: 4,
+                fontWeight: "bold",
+                textTransform: "none",
+                backgroundColor: "#007bff",
+                "&:hover": { backgroundColor: "#0056b3" },
+              }}
+            >
+              Register Now
+            </Button>
+          </Container>
         </Box>
-      </Modal>
+
+        {/* About the Program Section */}
+        <Box sx={{ py: 8 }}>
+          <Container maxWidth="md">
+            <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+              Why Choose Our Executive MBA in Health Management Technology?
+            </Typography>
+            <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ mb: 6 }}>
+              Elrazi Medical University, in collaboration with SENAI-CIMATEC, Brazil's leading
+              innovation institute, offers a groundbreaking postgraduate program. Designed for
+              healthcare professionals, this Executive MBA equips you with advanced management
+              skills, cutting-edge technology expertise, and invaluable global exposure.
+            </Typography>
+            <img
+              src="/assets/senai1.jpg"
+              // src="/images/program-collaboration.jpg"
+              alt="Program Collaboration"
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+              }}
+            />
+          </Container>
+        </Box>
+
+        {/* Program Highlights Section */}
+        <Box sx={{ py: 8, backgroundColor: "background.paper" }}>
+          <Container maxWidth="lg">
+            <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+              Program Highlights
+            </Typography>
+            <Grid container spacing={4}>
+              {[
+                {
+                  title: "Global Exposure",
+                  description:
+                    "Spend 12–14 weeks in Brazil, learning from world-class healthcare systems.",
+                  icon: "/images/global-exposure-icon.png",
+                },
+                {
+                  title: "Networking Opportunities",
+                  description: "Build connections with international healthcare leaders.",
+                  icon: "/images/networking-icon.png",
+                },
+                {
+                  title: "Cutting-Edge Technology",
+                  description:
+                    "Master the latest advancements in healthcare management and innovation.",
+                  icon: "/images/technology-icon.png",
+                },
+                {
+                  title: "Practical Applications",
+                  description:
+                    "Solve real-world healthcare challenges using theoretical knowledge.",
+                  icon: "/images/practical-applications-icon.png",
+                },
+              ].map((highlight, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Card
+                    sx={{
+                      textAlign: "center",
+                      py: 4,
+                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <img
+                      src={highlight.icon}
+                      alt={highlight.title}
+                      style={{ height: 50, marginBottom: "16px" }}
+                    />
+                    <CardContent>
+                      <Typography variant="h6" fontWeight="bold">
+                        {highlight.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                        {highlight.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
+
+        {/* Who Should Apply Section */}
+        <Box sx={{ py: 8 }}>
+          <Container maxWidth="md">
+            <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+              Is This Program for You?
+            </Typography>
+            <Stack spacing={2}>
+              <Typography variant="body1" color="text.secondary">
+                • Healthcare professionals aiming to advance their careers.
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                • Recent graduates in health sciences.
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                • Employers (hospitals, NGOs, MDAs, NMA) seeking workforce development.
+              </Typography>
+            </Stack>
+          </Container>
+        </Box>
+
+        {/* Call-to-Action Section */}
+        <Box
+          sx={{
+            py: 8,
+            backgroundColor: "#007bff",
+            color: "#fff",
+            textAlign: "center",
+          }}
+        >
+          <Container maxWidth="md">
+            <Typography variant="h4" fontWeight="bold">
+              Elevate Your Career and Shape the Future of Healthcare
+            </Typography>
+            <Typography variant="h6" sx={{ mt: 2, mb: 4 }}>
+              Seats are limited, so don’t miss this opportunity!
+            </Typography>
+            <Button
+              component={NextLink}
+              href="/register"
+              size="large"
+              variant="contained"
+              sx={{
+                fontWeight: "bold",
+                textTransform: "none",
+                backgroundColor: "#fff",
+                color: "#007bff",
+                "&:hover": { backgroundColor: "#e0e0e0" },
+              }}
+            >
+              Start Your Registration
+            </Button>
+          </Container>
+        </Box>
+      </Box>
     </>
   );
 };
 
-Page.getLayout = (page) => <DashboardLayout>{page}</DashboardLayout>;
-
-export default Page;
+export default LandingPage;

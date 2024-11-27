@@ -1,192 +1,199 @@
-import { useCallback, useContext, useEffect, useState } from "react";
 import Head from "next/head";
 import NextLink from "next/link";
-import { useRouter } from "next/navigation";
-import { useFormik } from "formik";
-import * as Yup from "yup";
 import {
-  Alert,
   Box,
   Button,
-  CircularProgress,
-  FormHelperText,
-  Link,
+  Card,
+  CardContent,
+  Container,
+  Grid,
   Stack,
-  Tab,
-  Tabs,
-  TextField,
   Typography,
 } from "@mui/material";
-import { Layout as AuthLayout } from "src/layouts/auth/layout";
-import axios from "axios";
-import axiosInstance from "config";
-import { ToastContainer, toast } from "react-toastify";
-import { AuthContext } from "src/context";
 
-const Page = () => {
-  const [loading, setLoading] = useState(false);
-
-  const router = useRouter();
-  const formik = useFormik({
-    initialValues: {
-      email: "",
-      password: "",
-    },
-    validationSchema: Yup.object({
-      email: Yup.string().email("Must be a valid email").max(70).required("Email is required"),
-      password: Yup.string().max(50).required("Password is required"),
-    }),
-    onSubmit: async (values) => {
-      const { email, password } = values;
-      setLoading(true);
-      axiosInstance
-        .post("/auth/login", { email, password })
-        .then((response) => {
-          if (response.status === 200) {
-            const user = response.data;
-            localStorage.setItem("token", user.token);
-            toast.success("Welcome back!");
-            router.push("/");
-            setLoading(false);
-          }
-        })
-        .catch((error) => {
-          if (error?.response?.status === 400) {
-            if (
-              error?.response?.data?.non_field_errors[0] === "Incorrect Password or Email Address"
-            ) {
-              toast.warning("Incorrect credentials");
-              alert("Incorrect email or password");
-              console.log("Error: Incorrect Email or Password");
-              setLoading(false);
-            } else {
-              console.log("An error occurred, but it's not related to incorrect password.");
-              setLoading(false);
-              toast.warning("Something went wrong, please check your credentials");
-            }
-          }
-        });
-    },
-  });
-
+const LandingPage = () => {
   return (
     <>
       <Head>
-        <title>Login | Elrazi Medical University, Kano</title>
+        <title>Executive MBA | Elrazi Medical University, Kano</title>
       </Head>
-      <Box
-        sx={{
-          backgroundColor: "background.paper",
-          flex: "1 1 auto",
-          alignItems: "center",
-          display: "flex",
-          justifyContent: "center",
-        }}
-      >
+      <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
+        {/* Header Section */}
         <Box
           sx={{
-            maxWidth: 550,
-            px: 3,
-            width: "100%",
+            backgroundImage: 'url("/images/healthcare-global.jpg")',
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "#fff",
+            py: 10,
+            textAlign: "center",
           }}
         >
-          <div>
-            <Stack spacing={1} sx={{ mb: 3 }}>
-              <Typography variant="h4">Login</Typography>
-            </Stack>
+          <Container maxWidth="lg">
+            <Typography variant="h3" fontWeight="bold">
+              A Global Partnership for Healthcare Leadership
+            </Typography>
+            <Typography variant="h5" sx={{ mt: 2 }}>
+              Transform your career with our Executive MBA in Health Management Technology
+            </Typography>
+            <Button
+              component={NextLink}
+              href="#register"
+              size="large"
+              variant="contained"
+              sx={{
+                mt: 4,
+                fontWeight: "bold",
+                textTransform: "none",
+                backgroundColor: "#007bff",
+                "&:hover": { backgroundColor: "#0056b3" },
+              }}
+            >
+              Register Now
+            </Button>
+          </Container>
+        </Box>
 
-            <form noValidate onSubmit={formik.handleSubmit}>
-              <Stack spacing={3}>
-                <TextField
-                  error={!!(formik.touched.email && formik.errors.email)}
-                  fullWidth
-                  helperText={formik.touched.email && formik.errors.email}
-                  label="Email Address"
-                  name="email"
-                  onBlur={formik.handleBlur}
-                  onChange={(e) => formik.setFieldValue("email", e.target.value.toLowerCase())}
-                  type="email"
-                  value={formik.values.email}
-                />
-                <TextField
-                  error={!!(formik.touched.password && formik.errors.password)}
-                  fullWidth
-                  helperText={formik.touched.password && formik.errors.password}
-                  label="Password"
-                  name="password"
-                  onBlur={formik.handleBlur}
-                  onChange={formik.handleChange}
-                  type="password"
-                  value={formik.values.password}
-                />
-              </Stack>
+        {/* About the Program Section */}
+        <Box sx={{ py: 8 }}>
+          <Container maxWidth="md">
+            <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+              Why Choose Our Executive MBA in Health Management Technology?
+            </Typography>
+            <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ mb: 6 }}>
+              Elrazi Medical University, in collaboration with SENAI-CIMATEC, Brazil's leading
+              innovation institute, offers a groundbreaking postgraduate program. Designed for
+              healthcare professionals, this Executive MBA equips you with advanced management
+              skills, cutting-edge technology expertise, and invaluable global exposure.
+            </Typography>
+            <img
+              src="/images/program-collaboration.jpg"
+              alt="Program Collaboration"
+              style={{
+                width: "100%",
+                borderRadius: "8px",
+                boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+              }}
+            />
+          </Container>
+        </Box>
 
-              {formik.errors.submit && (
-                <Typography color="error" sx={{ mt: 3 }} variant="body2">
-                  {formik.errors.submit}
-                </Typography>
-              )}
-              <Button
-                fullWidth
-                size="large"
-                sx={{ mt: 2 }}
-                type="submit"
-                variant="contained"
-                disabled={loading}
-              >
-                {loading ? (
-                  <CircularProgress size={24} color="inherit" />
-                ) : (
-                  <Typography>Login</Typography>
-                )}
-              </Button>
+        {/* Program Highlights Section */}
+        <Box sx={{ py: 8, backgroundColor: "background.paper" }}>
+          <Container maxWidth="lg">
+            <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+              Program Highlights
+            </Typography>
+            <Grid container spacing={4}>
+              {[
+                {
+                  title: "Global Exposure",
+                  description:
+                    "Spend 12–14 weeks in Brazil, learning from world-class healthcare systems.",
+                  icon: "/images/global-exposure-icon.png",
+                },
+                {
+                  title: "Networking Opportunities",
+                  description: "Build connections with international healthcare leaders.",
+                  icon: "/images/networking-icon.png",
+                },
+                {
+                  title: "Cutting-Edge Technology",
+                  description:
+                    "Master the latest advancements in healthcare management and innovation.",
+                  icon: "/images/technology-icon.png",
+                },
+                {
+                  title: "Practical Applications",
+                  description:
+                    "Solve real-world healthcare challenges using theoretical knowledge.",
+                  icon: "/images/practical-applications-icon.png",
+                },
+              ].map((highlight, index) => (
+                <Grid item xs={12} sm={6} md={3} key={index}>
+                  <Card
+                    sx={{
+                      textAlign: "center",
+                      py: 4,
+                      boxShadow: "0px 4px 10px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    <img
+                      src={highlight.icon}
+                      alt={highlight.title}
+                      style={{ height: 50, marginBottom: "16px" }}
+                    />
+                    <CardContent>
+                      <Typography variant="h6" fontWeight="bold">
+                        {highlight.title}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
+                        {highlight.description}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Container>
+        </Box>
 
-              <Typography sx={{ mt: 2, textAlign: "center" }} variant="h6" color="textSecondary">
-                or
+        {/* Who Should Apply Section */}
+        <Box sx={{ py: 8 }}>
+          <Container maxWidth="md">
+            <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
+              Is This Program for You?
+            </Typography>
+            <Stack spacing={2}>
+              <Typography variant="body1" color="text.secondary">
+                • Healthcare professionals aiming to advance their careers.
               </Typography>
-
-              <Button
-                fullWidth
-                size="large"
-                sx={{ mt: 2 }}
-                component={NextLink}
-                href="/auth/register"
-                variant="outlined"
-              >
-                Create Account
-              </Button>
-            </form>
-
-            <Typography sx={{ pt: 4 }} textAlign="center" color="text.secondary" variant="h6">
-              Don&apos;t have an account? &nbsp;
-              <Link component={NextLink} href="/auth/register" underline="hover" variant="h6">
-                Register here
-              </Link>
-            </Typography>
-
-            <Typography sx={{ mt: 4 }} textAlign="center" color="text.secondary" variant="h6">
-              If you encounter any issues or have questions, feel free to contact our support team.
-            </Typography>
-            <Stack mt="10px" alignItems="center">
-              <Stack spacing={1} direction="row">
-                <Typography fontWeight="bold">Email:</Typography>
-                <Typography variant="body1">ict@elrazi.edu.ng</Typography>
-              </Stack>
-              <Stack spacing={1} direction="row">
-                <Typography fontWeight="bold">Phone:</Typography>
-                <Typography variant="body1">+234 808 427 7233</Typography>
-              </Stack>
+              <Typography variant="body1" color="text.secondary">
+                • Recent graduates in health sciences.
+              </Typography>
+              <Typography variant="body1" color="text.secondary">
+                • Employers (hospitals, NGOs, MDAs, NMA) seeking workforce development.
+              </Typography>
             </Stack>
-            <Typography mt="20px" textAlign="center" variant="body2">
-              Thank you for choosing Elrazi Medical University.
+          </Container>
+        </Box>
+
+        {/* Call-to-Action Section */}
+        <Box
+          sx={{
+            py: 8,
+            backgroundColor: "#007bff",
+            color: "#fff",
+            textAlign: "center",
+          }}
+        >
+          <Container maxWidth="md">
+            <Typography variant="h4" fontWeight="bold">
+              Elevate Your Career and Shape the Future of Healthcare
             </Typography>
-          </div>
+            <Typography variant="h6" sx={{ mt: 2, mb: 4 }}>
+              Seats are limited, so don’t miss this opportunity!
+            </Typography>
+            <Button
+              component={NextLink}
+              href="/register"
+              size="large"
+              variant="contained"
+              sx={{
+                fontWeight: "bold",
+                textTransform: "none",
+                backgroundColor: "#fff",
+                color: "#007bff",
+                "&:hover": { backgroundColor: "#e0e0e0" },
+              }}
+            >
+              Start Your Registration
+            </Button>
+          </Container>
         </Box>
       </Box>
     </>
   );
 };
 
-Page.getLayout = (page) => <AuthLayout>{page}</AuthLayout>;
-
-export default Page;
+export default LandingPage;
