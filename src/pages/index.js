@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities */
 import Head from "next/head";
 import NextLink from "next/link";
 import { Box, Button, Card, CardContent, Container, Grid, Stack, Typography } from "@mui/material";
@@ -53,7 +54,7 @@ const LandingPage = () => {
               Why Choose Our Executive MBA in Health Management Technology?
             </Typography>
             <Typography variant="body1" textAlign="center" color="text.secondary" sx={{ mb: 6 }}>
-              Elrazi Medical University, in collaboration with SENAI-CIMATEC, Brazil's leading
+              Elrazi Medical University, in collaboration with SENAI-CIMATEC, Brazil&apos;s leading
               innovation institute, offers a groundbreaking postgraduate program. Designed for
               healthcare professionals, this Executive MBA equips you with advanced management
               skills, cutting-edge technology expertise, and invaluable global exposure.
