@@ -14,10 +14,30 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axiosInstance from "src/api/config";
 import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 
 const RegisterPage = () => {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(false); // State for success message
+
+  const [passportFileName, setPassportFileName] = useState("");
+  const [undergraduateFileName, setUndergraduateFileName] = useState("");
+  const [postgraduateFileName, setPostgraduateFileName] = useState("");
+
+  const handleFileChange = (event, fieldName) => {
+    const file = event.target.files[0];
+    if (fieldName === "passportOrNIN") {
+      formik.setFieldValue("passportOrNIN", file);
+      setPassportFileName(file.name); // Set the file name for passport
+    } else if (fieldName === "undergraduateDocs") {
+      formik.setFieldValue("undergraduateDocs", file);
+      setUndergraduateFileName(file.name); // Set the file name for undergraduate docs
+    } else if (fieldName === "postgraduateDocs") {
+      formik.setFieldValue("postgraduateDocs", file);
+      setPostgraduateFileName(file.name); // Set the file name for postgraduate docs
+    }
+  };
 
   const formik = useFormik({
     initialValues: {
@@ -35,25 +55,49 @@ const RegisterPage = () => {
     validationSchema: Yup.object({
       full_name: Yup.string().required("Full name is required"),
       email: Yup.string().email("Invalid email").required("Email is required"),
-      phone_number: Yup.string().required("Phone number is required"),
+      phone_number: Yup.string()
+        .required("Phone number is required")
+        .min(8, "Phone number must be at least 10 digits")
+        .matches(
+          /^\+?\d{1,4}[-\s]?\(?\d{1,4}\)?[-\s]?\d{1,4}[-\s]?\d{1,4}$/,
+          "Invalid phone number format"
+        ),
       address: Yup.string().required("Address is required"),
       country_of_residence: Yup.string().required("Country is required"),
       passportOrNIN: Yup.mixed()
         .required("International Passport/NIN is required")
         .test("fileSize", "File size is too large", (value) => {
-          return value && value.size <= 5 * 1024 * 1024; // 5MB max file size
+          return !value || (value && value.size <= 2 * 1024 * 1024);
         })
         .test("fileType", "Unsupported file format", (value) => {
-          return value && ["image/jpeg", "image/png", "application/pdf"].includes(value.type);
+          return (
+            !value || (value && ["image/jpeg", "image/png", "application/pdf"].includes(value.type))
+          );
         }),
       qualifications: Yup.string().required("Qualifications are required"),
       input_name_of_degree: Yup.string().required("Degree name is required"),
-      undergraduateDocs: Yup.mixed().nullable(),
-      postgraduateDocs: Yup.mixed().nullable(),
+      undergraduateDocs: Yup.mixed()
+        .required("Undergraduate document is required")
+        .test("fileSize", "File size is too large", (value) => {
+          return !value || (value && value.size <= 2 * 1024 * 1024);
+        })
+        .test("fileType", "Unsupported file format", (value) => {
+          return (
+            !value || (value && ["image/jpeg", "image/png", "application/pdf"].includes(value.type))
+          );
+        }),
+      postgraduateDocs: Yup.mixed()
+        .nullable()
+        .test("fileSize", "File size is too large", (value) => {
+          return !value || (value && value.size <= 2 * 1024 * 1024);
+        })
+        .test("fileType", "Unsupported file format", (value) => {
+          return (
+            !value || (value && ["image/jpeg", "image/png", "application/pdf"].includes(value.type))
+          );
+        }),
     }),
-      onSubmit: async (values) => {
-        // console.log(values);  
-        //   return;
+    onSubmit: async (values) => {
       setLoading(true); // Show loading state
       try {
         const formData = new FormData();
@@ -66,7 +110,6 @@ const RegisterPage = () => {
         formData.append("qualifications", values.qualifications);
         formData.append("input_name_of_degree", values.input_name_of_degree);
 
-        
         // Conditionally append files if present
         if (values.undergraduateDocs) {
           formData.append("undergraduate_documents", values.undergraduateDocs);
@@ -83,7 +126,10 @@ const RegisterPage = () => {
 
         if (response.status === 201) {
           setSuccessMessage(true); // Show success message
-          console.log({ response });
+          setPassportFileName("");
+          setPostgraduateFileName("");
+          setUndergraduateFileName("");
+          formik.resetForm(); // Reset form fields
         } else {
           alert("Registration failed. Please try again.");
         }
@@ -117,14 +163,41 @@ const RegisterPage = () => {
         }}
       >
         <Container maxWidth="md">
+          <Box sx={{ position: "absolute", top: 0, left: 0, padding: 1 }}>
+            <Link href="/" passHref>
+              <Image
+                src="/assets/LogoElraziBack.svg" // Replace with your logo path
+                alt="Logo Left"
+                width={120} // Adjust width to your preference
+                height={40} // Adjust height as needed
+              />
+            </Link>
+          </Box>
+
+          {/* Logo at top right */}
+          <Box sx={{ position: "absolute", top: 0, right: 4, padding: 1 }}>
+            <Link href="/" passHref>
+              <Image
+                src="/assets/SenaiCimatec.png" // Replace with your logo path
+                alt="Logo Right"
+                width={120} // Adjust width to your preference
+                height={40} // Adjust height as needed
+              />
+            </Link>
+          </Box>
           {!successMessage ? (
             <>
-              <Typography variant="h4" fontWeight="bold" textAlign="center" sx={{ mb: 4 }}>
-                Executive MBA Registration
+              <Typography
+                variant="h4"
+                fontWeight="bold"
+                textAlign="center"
+                sx={{ mb: 4, fontSize: "2.5rem", color: "#007bff" }}
+              >
+                Executive MBA in Healthcare Management & Technologies
               </Typography>
               <Typography variant="body1" color="text.secondary" textAlign="center" sx={{ mb: 6 }}>
-                Fill in the form below to register for the Executive MBA in Health Management
-                Technology. Ensure all fields are completed.
+                Fill in the form below to register for the Executive MBA in Healthcare Management &
+                Technologies. Ensure all fields are completed.
               </Typography>
               <form onSubmit={formik.handleSubmit} encType="multipart/form-data">
                 <Grid container spacing={4}>
@@ -208,16 +281,12 @@ const RegisterPage = () => {
                     <Stack spacing={1}>
                       <Typography variant="subtitle1">Upload International Passport/NIN</Typography>
                       <Button variant="contained" component="label">
-                        Upload File
+                        {passportFileName ? "Selected file: " + passportFileName : "Upload File"}
                         <input
                           type="file"
                           hidden
                           accept="image/*,application/pdf"
-                          onChange={(event) => {
-                            const file = event.currentTarget.files[0];
-                            console.log("Selected file:", file); // Debug log
-                            formik.setFieldValue("passportOrNIN", file);
-                          }}
+                          onChange={(event) => handleFileChange(event, "passportOrNIN")}
                         />
                       </Button>
                       {formik.errors.passportOrNIN && (
@@ -266,13 +335,13 @@ const RegisterPage = () => {
                     <Stack spacing={1}>
                       <Typography variant="subtitle1">Upload Undergraduate Documents</Typography>
                       <Button variant="contained" component="label">
-                        Upload Files
+                        {undergraduateFileName
+                          ? "Selected file: " + undergraduateFileName
+                          : "Upload File"}
                         <input
                           type="file"
                           hidden
-                          onChange={(event) =>
-                            formik.setFieldValue("undergraduateDocs", event.currentTarget.files[0])
-                          }
+                          onChange={(event) => handleFileChange(event, "undergraduateDocs")}
                         />
                       </Button>
                       {formik.errors.undergraduateDocs && (
@@ -288,13 +357,14 @@ const RegisterPage = () => {
                     <Stack spacing={1}>
                       <Typography variant="subtitle1">Upload Postgraduate Documents</Typography>
                       <Button variant="contained" component="label">
-                        Upload Files
+                        {postgraduateFileName
+                          ? "Selected file: " + postgraduateFileName
+                          : "Upload File"}
+
                         <input
                           type="file"
                           hidden
-                          onChange={(event) =>
-                            formik.setFieldValue("postgraduateDocs", event.currentTarget.files[0])
-                          }
+                          onChange={(event) => handleFileChange(event, "postgraduateDocs")}
                         />
                       </Button>
                       {formik.errors.postgraduateDocs && (
@@ -329,7 +399,7 @@ const RegisterPage = () => {
             </>
           ) : (
             <Box sx={{ textAlign: "center" }}>
-              <Typography variant="h5" color="success.main" sx={{ mb: 2 }}>
+              <Typography variant="h5" color="success.main" sx={{ mb: 2, mt: 10 }}>
                 Registration Successful!
               </Typography>
               <Typography variant="body1" color="text.secondary">
