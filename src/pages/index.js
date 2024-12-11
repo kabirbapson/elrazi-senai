@@ -14,22 +14,22 @@ const LandingPage = () => {
       <Box sx={{ backgroundColor: "background.default", minHeight: "100vh" }}>
         {/* Hero Section */}
         <Box
-          // sx={{
-          //   position: "relative",
-          //   width: "100%",
-          //   height: "90vh",
-          //   overflow: "hidden",
-          // }}
-          sx={{
-            position: "relative",
-            width: "100%",
-            height: "90vh",
-            overflow: "hidden",
-            backgroundImage: `url('/assets/senai_banner.png')`, // Set image as background
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            backgroundRepeat: "no-repeat",
-          }}
+        // sx={{
+        //   position: "relative",
+        //   width: "100%",
+        //   height: "90vh",
+        //   overflow: "hidden",
+        // }}
+        // sx={{
+        //   position: "relative",
+        //   width: "100%",
+        //   height: "90vh",
+        //   overflow: "hidden",
+        //   backgroundImage: `url('/assets/senai_banner.png')`, // Set image as background
+        //   backgroundSize: "cover",
+        //   backgroundPosition: "center",
+        //   backgroundRepeat: "no-repeat",
+        // }}
         >
           {/* <img
             src="/assets/senai_banner.png" // Just provide the path to the image here
@@ -53,7 +53,8 @@ const LandingPage = () => {
               justifyContent: "center",
               alignItems: "center",
               textAlign: "center",
-              color: "#fff", // You can adjust this if needed
+              mt: 4,
+              color: "#00008B", // You can adjust this if needed
               fontWeight: 900, // Makes the text bold
               textShadow: "0px 4px 6px rgba(0, 0, 0, 0.9)", // Adds more shadow for contrast
               fontSize: { xs: "2.5rem", sm: "3.5rem", md: "4rem" }, // Adjust font size for responsiveness
@@ -102,10 +103,10 @@ const LandingPage = () => {
             <Typography variant="h4" fontWeight="bold" sx={{ mb: 4 }}>
               Why Choose Our Executive MBA?
             </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 6 }}>
-              In partnership with SENAI-CIMATEC, Brazil's leading innovation institute, we offer a
-              world-class postgraduate program that blends healthcare, management, and technology
-              expertise.
+            <Typography variant="body1" fontWeight="bold" color="text.secondary" sx={{ mb: 6 }}>
+              Elrazi Medical University, Kano In partnership with SENAI-CIMATEC, Brazil's leading
+              innovation institute, we offer a world-class postgraduate program that blends
+              healthcare, management, and technology expertise.
             </Typography>
             <img
               src="/assets/senai1.jpg"
